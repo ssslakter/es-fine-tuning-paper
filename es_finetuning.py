@@ -26,7 +26,7 @@ import shutil
 import signal
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
@@ -52,9 +52,10 @@ class ESConfig:
     model_name: str = "Qwen/Qwen2.5-3B-Instruct"
     sigma: float = 0.001
     alpha: float = 0.0005
+    max_samples: int = 200
     population_size: int = 30
     num_iterations: int = 1000
-    experiment_dir: str = "es-ft-experiment"
+    experiment_dir: str = "outputs/es-ft-experiment"
     cuda_devices: list[int] = field(default_factory=lambda: [0, 1, 2, 3])
     global_seed: Optional[int] = None
     verbose: bool = False
@@ -373,9 +374,10 @@ def parse_args() -> ESConfig:
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-3B-Instruct")
     parser.add_argument("--sigma", type=float, default=0.001)
     parser.add_argument("--alpha", type=float, default=0.0005)
+    parser.add_argument("--max-samples", type=int, default=200)
     parser.add_argument("--population_size", type=int, default=30)
     parser.add_argument("--num_iterations", type=int, default=1000)
-    parser.add_argument("--experiment_dir", type=str, default="es-ft-experiment")
+    parser.add_argument("--experiment_dir", type=str, default="outputs/es-ft-experiment")
     parser.add_argument("--cuda_devices", type=str, default="0,1,2,3")
     parser.add_argument("--global_seed", type=int, default=None)
     parser.add_argument("--verbose", action="store_true")
@@ -410,7 +412,7 @@ def main(cfg: ESConfig) -> None:
 
     model_path = prepare_model_checkpoint(cfg.model_name, os.path.join(run_dir, "model_saves"))
 
-    task = CountdownTask("countdown/data/countdown.json", max_samples=200)
+    task = CountdownTask("countdown/data/countdown.json", max_samples=cfg.max_samples)
     pool = EnginePool(cfg.num_engines, model_path)
 
     def cleanup() -> None:

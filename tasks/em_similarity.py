@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
 
-from es_fine_tuning import ESTask
+from .base import ESTask
 
 
 class SemanticSimilarityTask(ESTask):
