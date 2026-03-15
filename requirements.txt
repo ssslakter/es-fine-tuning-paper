@@ -5,3 +5,4 @@ psutil>=5.8.0
 pandas>=2.3.0
 tensorboard
 vllm==0.11.0
+sentence-transformers
