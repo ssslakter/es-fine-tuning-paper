@@ -378,7 +378,7 @@ class ESTrainer:
             v["norm_reward"] = (v["avg_reward"] - mean) / (std + 1e-8)
         return mean, std, float(rewards.min()), float(rewards.max())
     
-    def _save_checkpoint(self, epoch: int):
+    def _save_checkpoint(self, epoch: int, save_last: bool = False):
         base_dir = os.path.join(self.run_dir, "checkpoints")
         os.makedirs(base_dir, exist_ok=True)
 
@@ -388,7 +388,7 @@ class ESTrainer:
         ckpt_path = os.path.join(latest_path, "pytorch_model.pth")
         self.pool.save_weights(ckpt_path)
 
-        if epoch % self._checkpoint_interval == 0:
+        if save_last or epoch % self._checkpoint_interval == 0:
             ep_path = os.path.join(base_dir, f"epoch_{epoch}")
             os.makedirs(ep_path, exist_ok=True)
             self.pool.save_weights(os.path.join(ep_path, "pytorch_model.pth"))
@@ -470,7 +470,10 @@ class ESTrainer:
 
             epoch_time = time.time() - epoch_start
             self.logger.info(f"=== Epoch {epoch} done in {epoch_time:.1f}s ===")
-            self._save_checkpoint(epoch)
+            if epoch == n_epochs - 1:
+                self._save_checkpoint(epoch, save_last=True)
+            else:
+                self._save_checkpoint(epoch)
 
 
 # ---------------------------------------------------------------------------
